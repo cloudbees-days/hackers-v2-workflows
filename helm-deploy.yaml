@@ -42,7 +42,7 @@ jobs:
         with:
           chart-location: ${{ cloudbees.workspace }}/chart
           release-name: ${{ inputs.appName }}
-          namespace: ${{ vars.namespace }}
+          namespace: ${{ inputs.environment }}
           values: |
             image:
               repository: ${{ vars.DOCKER_USER }}/${{ inputs.appName }}
