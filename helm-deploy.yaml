@@ -1,0 +1,64 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: deploy
+
+on:
+  workflow_call:
+    inputs:
+      artifact-id:
+        type: string
+        required: true
+      artifactVersion:
+        type: string
+        required: true
+      environment:
+        type: string
+        required: true
+      hostname:
+        type: string
+        required: true
+      appName:
+        type: string
+        required: true
+      repo:
+        type: string
+        required: true
+
+jobs:
+  deploy:
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+        with:
+          repository: ${{ inputs.repo }}
+      - uses: cloudbees-days/setup-kubeconfig
+        name: Set kubeconfig
+        with:
+          kubeconfig: ${{ secrets.kubeconfig }}
+      - id: install-chart
+        name: Install helm chart
+        uses: cloudbees-io/helm-install@v1
+        kind: deploy
+        with:
+          chart-location: ${{ cloudbees.workspace }}/chart
+          release-name: ${{ inputs.appName }}
+          namespace: ${{ vars.namespace }}
+          values: |
+            image:
+              repository: ${{ vars.DOCKERHUB_USER }}/${{ inputs.appName }}
+              tag: ${{ inputs.artifactVersion }}
+            hostname: ${{ inputs.hostname }}
+      - name: Register deployed artifact
+        uses: cloudbees-io/register-deployed-artifact@v2
+        with:
+          artifact-id: ${{ inputs.artifact-id }}
+          target-environment: ${{ inputs.environment }}
+      - name: Publish evidence
+        uses: cloudbees-io/publish-evidence-item@v1
+        with:
+          content: |-
+            ## Deployed environment
+            [Deployed app](${{ inputs.hostname }})
+            Running ${{ inputs.appName }}:${{ inputs.artifactVersion }} in ${{ vars.namespace }} namespace
+          format: MARKDOWN
