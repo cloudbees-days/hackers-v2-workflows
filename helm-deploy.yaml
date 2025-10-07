@@ -46,7 +46,7 @@ jobs:
           namespace: ${{ vars.namespace }}
           values: |
             image:
-              repository: ${{ vars.DOCKERHUB_USER }}/${{ inputs.appName }}
+              repository: ${{ vars.DOCKER_USER }}/${{ inputs.appName }}
               tag: ${{ inputs.artifactVersion }}
             hostname: ${{ inputs.hostname }}
       - name: Register deployed artifact
