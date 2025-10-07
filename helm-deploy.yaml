@@ -26,7 +26,6 @@ on:
 
 jobs:
   deploy:
-    environment: ${{ inputs.environment }}
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
