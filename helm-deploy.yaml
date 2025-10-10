@@ -23,6 +23,9 @@ on:
       repo:
         type: string
         required: true
+      helmValues:
+        type: string
+        required: false
 
 jobs:
   deploy:
@@ -43,11 +46,7 @@ jobs:
           chart-location: ${{ cloudbees.workspace }}/chart
           release-name: ${{ inputs.appName }}
           namespace: ${{ inputs.environment }}
-          values: |
-            image:
-              repository: ${{ vars.DOCKER_USER }}/${{ inputs.appName }}
-              tag: ${{ inputs.artifactVersion }}
-            hostname: ${{ inputs.hostname }}
+          values: ${{ inputs.helmValues }}
       - name: Register deployed artifact
         uses: cloudbees-io/register-deployed-artifact@v2
         with:
